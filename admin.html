@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Trans-Nzoia Community ICT Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+
+    /* ── Reset & Tokens ───────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #003049;
+      --navy-dark:  #001f30;
+      --navy-mid:   #004060;
+      --red:        #D62828;
+      --red-hover:  #bf2020;
+      --orange:     #F77F00;
+      --amber:      #FCBF49;
+      --amber-pale: #FFF5D6;
+      --teal:       #00897B;
+      --teal-pale:  #E0F2F1;
+      --text:       #1A1A1A;
+      --muted:      #5C5040;
+      --border:     #E8D8C0;
+      --bg:         #F7F0E6;
+      --white:      #FFFFFF;
+      --sidebar-w:  240px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
+
+
+    /* ── Layout — sidebar + main ──────────────────── */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+
+    /* ── Sidebar ──────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy-dark);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 50;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 1.4rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-logo-badge {
+      width: 36px;
+      height: 36px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900;
+      color: var(--white);
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+    }
+
+    .sidebar-logo-text small {
+      display: block;
+      font-size: 0.6rem;
+      color: var(--amber);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1.2rem 0;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.28);
+      font-weight: 700;
+      padding: 0.8rem 1.2rem 0.3rem;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 1.2rem;
+      color: rgba(255,255,255,0.62);
+      font-size: 0.83rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+      font-family: 'Inter', sans-serif;
+      text-decoration: none;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--white);
+    }
+
+    .sidebar-link.active {
+      background: rgba(214,40,40,0.18);
+      color: var(--white);
+      border-left-color: var(--red);
+    }
+
+    .sidebar-link .icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.2rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .logged-in-as {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .logged-in-as span {
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    .logout-btn {
+      width: 100%;
+      background: rgba(214,40,40,0.2);
+      border: 1px solid rgba(214,40,40,0.35);
+      color: #ff8a80;
+      padding: 7px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(214,40,40,0.35);
+    }
+
+
+    /* ── Main content area ────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+
+    /* ── Top bar ──────────────────────────────────── */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-date {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .back-to-site {
+      font-size: 0.78rem;
+      color: var(--red);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 5px 12px;
+      border: 1px solid var(--red);
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .back-to-site:hover {
+      background: var(--red);
+      color: var(--white);
+    }
+
+
+    /* ── Page sections ────────────────────────────── */
+    .page-section {
+      display: none;
+      padding: 2rem;
+      flex: 1;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    .page-header {
+      margin-bottom: 1.8rem;
+    }
+
+    .page-header h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 3px;
+    }
+
+    .page-header p {
+      font-size: 0.83rem;
+      color: var(--muted);
+    }
+
+
+    /* ── Stat cards ───────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      border-top: 3px solid var(--red);
+    }
+
+    .stat-card.orange { border-top-color: var(--orange); }
+    .stat-card.amber  { border-top-color: var(--amber);  }
+    .stat-card.teal   { border-top-color: var(--teal);   }
+
+    .stat-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--navy);
+      font-family: 'Poppins', sans-serif;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+
+    /* ── Toolbar (search + filter + export) ──────── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--white);
+    }
+
+    .search-input:focus {
+      border-color: var(--red);
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .export-btn {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .export-btn:hover {
+      background: var(--navy-mid);
+    }
+
+    .refresh-btn {
+      background: var(--white);
+      color: var(--navy);
+      border: 1.5px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+
+    /* ── Data table ───────────────────────────────── */
+    .table-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    thead {
+      background: var(--navy);
+    }
+
+    thead th {
+      padding: 11px 14px;
+      text-align: left;
+      color: rgba(255,255,255,0.85);
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--amber-pale);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .td-name {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .td-muted {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    /* Course badge */
+    .course-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-web    { background: #E3F2FD; color: #1565C0; }
+    .badge-pkg    { background: var(--teal-pale); color: #00695C; }
+    .badge-python { background: #F3E5F5; color: #6A1B9A; }
+    .badge-cyber  { background: #FBE9E7; color: #BF360C; }
+    .badge-design { background: #FFF8E1; color: #F57F17; }
+    .badge-mktg   { background: #E8F5E9; color: #2E7D32; }
+
+    /* Status dot */
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-dot::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-new::before    { background: var(--orange); }
+    .status-active::before { background: var(--teal); }
+    .status-done::before   { background: #aaa; }
+
+    /* Action buttons in table */
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--navy);
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      margin-right: 4px;
+    }
+
+    .action-btn:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .action-btn.danger:hover {
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    /* Table footer — count + pagination */
+    .table-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: #faf6f0;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 4px;
+    }
+
+    .pg-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .pg-btn:hover,
+    .pg-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: var(--white);
+    }
+
+
+    /* ── Empty state ──────────────────────────────── */
+    .empty-state {
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state p {
+      font-size: 0.88rem;
+      margin-top: 8px;
+    }
+
+
+    /* ── API notice banner ────────────────────────── */
+    .api-notice {
+      background: var(--amber-pale);
+      border: 1px solid var(--amber);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      color: #7B5000;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .api-notice strong {
+      color: var(--navy);
+    }
+
+    .api-notice code {
+      background: rgba(0,0,0,0.07);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-family: monospace;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ================================================
+       AUTH GUARD — redirect to login if not signed in
+  ================================================ -->
+  <script>
+    if (!sessionStorage.getItem('adminLoggedIn')) {
+      window.location.href = 'admin-login.html';
+    }
+  </script>
+
+
+  <div class="layout">
+
+    <!-- ============================================
+         SIDEBAR
+    ============================================ -->
+    <aside class="sidebar">
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-badge">TN</div>
+        <div class="sidebar-logo-text">
+          ICT Hub
+          <small>Admin Panel</small>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="sidebar-nav">
+
+        <div class="sidebar-section-label">Overview</div>
+        <button class="sidebar-link active" onclick="showSection('dashboard', this)">
+          <span class="icon">&#9632;</span> Dashboard
+        </button>
+
+        <div class="sidebar-section-label">Data</div>
+        <button class="sidebar-link" onclick="showSection('students', this)">
+          <span class="icon">&#128100;</span> Enrolled Students
+        </button>
+        <button class="sidebar-link" onclick="showSection('courses', this)">
+          <span class="icon">&#128218;</span> Courses
+        </button>
+        <button class="sidebar-link" onclick="showSection('instructors', this)">
+          <span class="icon">&#128101;</span> Instructors
+        </button>
+
+        <div class="sidebar-section-label">Site</div>
+        <a class="sidebar-link" href="index.html" target="_blank">
+          <span class="icon">&#8599;</span> View Website
+        </a>
+
+      </nav>
+
+      <!-- Logged-in user + logout -->
+      <div class="sidebar-footer">
+        <div class="logged-in-as">
+          Signed in as<br>
+          <span id="adminUserLabel">admin</span>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+
+    </aside>
+
+
+    <!-- ============================================
+         MAIN
+    ============================================ -->
+    <div class="main">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <span class="topbar-title" id="topbarTitle">Dashboard</span>
+        <div class="topbar-right">
+          <span class="topbar-date" id="topbarDate"></span>
+          <a class="back-to-site" href="index.html" target="_blank">View Site</a>
+        </div>
+      </div>
+
+
+      <!-- ==========================================
+           SECTION: Dashboard
+      ========================================== -->
+      <div class="page-section active" id="section-dashboard">
+
+        <div class="page-header">
+          <h2>Dashboard</h2>
+          <p>Overview of all enrollments, courses and activity.</p>
+        </div>
+
+        <!-- API notice -->
+        <div class="api-notice">
+          <strong>Backend integration required.</strong>
+          Connect this dashboard to your Node.js API. Replace <code>loadStudents()</code>,
+          <code>loadCourses()</code> and <code>loadInstructors()</code> with
+          <code>fetch('/api/admin/...')</code> calls that return JSON from your database.
+          Demo data is shown below until the backend is live.
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Enrollments</div>
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-sub">All time</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-label">New This Month</div>
+            <div class="stat-value" id="statMonth">—</div>
+            <div class="stat-sub">Pending review</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-label">Courses Running</div>
+            <div class="stat-value" id="statCourses">—</div>
+            <div class="stat-sub">Active now</div>
+          </div>
+          <div class="stat-card teal">
+            <div class="stat-label">Instructors</div>
+            <div class="stat-value" id="statInstructors">—</div>
+            <div class="stat-sub">On staff</div>
+          </div>
+        </div>
+
+        <!-- Recent enrollments preview -->
+        <div class="page-header" style="margin-bottom:1rem;">
+          <h2 style="font-size:1rem;">Recent Enrollments</h2>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table id="dashTable">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Course</th>
+                  <th>Phone</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashTableBody">
+                <tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa;">Loading data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /section-dashboard -->
+
+
+      <!-- ==========================================
+           SECTION: Enrolled Students
+      ========================================== -->
+      <div class="page-section" id="section-students">
+
+        <div class="page-header">
+          <h2>Enrolled Students</h2>
+          <p>All students who submitted an enrollment application.</p>
+        </div>
+
+        <div class="toolbar">
+          <input
+            class="search-input"
+            type="text"
+            id="studentSearch"
+            placeholder="Search by name, phone or email..."
+            oninput="filterStudents()"
+          >
+          <select class="filter-select" id="courseFilter" onchange="filterStudents()">
+            <option value="">All Courses</option>
+            <option>Computer Packages</option>
+            <option>Web Development Bootcamp</option>
+            <option>Python and Data Science</option>
+            <option>Cybersecurity Basics</option>
+            <option>Graphic Design</option>
+            <option>Digital Marketing</option>
+          </select>
+          <button class="refresh-btn" onclick="loadStudents()">Refresh</button>
+          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Full Name</th>
+                  <th>ID Number</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Address</th>
+                  <th>Course</th>
+                  <th>Schedule</th>
+                  <th>Enrolled</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody">
+                <tr><td colspan="11" style="text-align:center;padding:2rem;color:#aaa;">Loading data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <span id="studentCount">Showing 0 records</span>
+            <div class="pagination" id="studentPagination"></div>
+          </div>
+        </div>
+
+      </div><!-- /section-students -->
+
+
+      <!-- ==========================================
+           SECTION: Courses
+      ========================================== -->
+      <div class="page-section" id="section-courses">
+
+        <div class="page-header">
+          <h2>Courses</h2>
+          <p>Manage the courses offered at the hub.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Course Name</th>
+                  <th>Duration</th>
+                  <th>Schedule</th>
+                  <th>Enrolled</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="coursesTableBody">
+                <tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa;">Loading data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /section-courses -->
+
+
+      <!-- ==========================================
+           SECTION: Instructors
+      ========================================== -->
+      <div class="page-section" id="section-instructors">
+
+        <div class="page-header">
+          <h2>Instructors</h2>
+          <p>Manage instructor profiles displayed on the website.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Subject</th>
+                  <th>Phone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="instructorsTableBody">
+                <tr><td colspan="5" style="text-align:center;padding:2rem;color:#aaa;">Loading data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /section-instructors -->
+
+    </div><!-- /main -->
+  </div><!-- /layout -->
+
+
+  <!-- ================================================
+       JAVASCRIPT
+  ================================================ -->
+  <script>
+
+    /* ── Demo data ─────────────────────────────────────
+       Replace these arrays with real fetch() calls to
+       your backend API once the server is running.
+       e.g. fetch('/api/admin/students', {
+              headers: { Authorization: 'Bearer ' + token }
+            }).then(r => r.json()).then(data => renderStudents(data))
+    ─────────────────────────────────────────────────── */
+
+    var DEMO_STUDENTS = [
+      { id: 1,  firstName: 'Amina',   middleName: '',       lastName: 'Mwangi',   idType: 'National ID', idNumber: '12345678', phone: '+254 712 345 678', email: 'amina@email.com',  address: 'Milimani, Kitale',     course: 'Computer Packages',       schedule: 'Morning',   date: '2025-06-01', status: 'Active' },
+      { id: 2,  firstName: 'Brian',   middleName: 'Kiprop', lastName: 'Kamau',    idType: 'National ID', idNumber: '23456789', phone: '+254 723 456 789', email: 'brian@email.com',  address: 'Kiminini, Trans-Nzoia', course: 'Web Development Bootcamp', schedule: 'Afternoon', date: '2025-06-02', status: 'Active' },
+      { id: 3,  firstName: 'Faith',   middleName: 'Auma',   lastName: 'Otieno',   idType: 'Student ID',  idNumber: 'STU-0012', phone: '+254 734 567 890', email: '',                address: 'Bidii, Kitale',         course: 'Python and Data Science',  schedule: 'Evening',   date: '2025-06-03', status: 'New' },
+      { id: 4,  firstName: 'James',   middleName: '',       lastName: 'Wekesa',   idType: 'National ID', idNumber: '34567890', phone: '+254 745 678 901', email: 'james@email.com', address: 'Saboti, Trans-Nzoia',   course: 'Cybersecurity Basics',    schedule: 'Weekend',   date: '2025-06-04', status: 'New' },
+      { id: 5,  firstName: 'Grace',   middleName: 'Jebet',  lastName: 'Chebet',   idType: 'National ID', idNumber: '45678901', phone: '+254 756 789 012', email: 'grace@email.com', address: 'Endebess, Trans-Nzoia', course: 'Graphic Design',           schedule: 'Morning',   date: '2025-06-05', status: 'Active' },
+      { id: 6,  firstName: 'Peter',   middleName: 'Maina',  lastName: 'Njoroge',  idType: 'None',        idNumber: '—',        phone: '+254 767 890 123', email: '',                address: 'Kwanza, Trans-Nzoia',   course: 'Digital Marketing',        schedule: 'Afternoon', date: '2025-06-06', status: 'New' },
+      { id: 7,  firstName: 'Lydia',   middleName: '',       lastName: 'Akinyi',   idType: 'Birth Cert',  idNumber: 'BC-55432', phone: '+254 778 901 234', email: 'lydia@email.com', address: 'Kinyoro, Trans-Nzoia',  course: 'Computer Packages',       schedule: 'Morning',   date: '2025-06-07', status: 'Active' },
+      { id: 8,  firstName: 'Kevin',   middleName: 'Rotich', lastName: 'Sang',     idType: 'Passport',    idNumber: 'KE123456', phone: '+254 789 012 345', email: 'kevin@email.com', address: 'Matunda, Trans-Nzoia',  course: 'Web Development Bootcamp', schedule: 'Evening',   date: '2025-06-08', status: 'Active' },
+    ];
+
+    var DEMO_COURSES = [
+      { id: 1, name: 'Computer Packages (Word, Excel, PowerPoint)', duration: '6 Weeks',  schedule: 'Morning / Afternoon', enrolled: 2 },
+      { id: 2, name: 'Web Development Bootcamp',                    duration: '12 Weeks', schedule: 'Afternoon / Evening', enrolled: 2 },
+      { id: 3, name: 'Python and Data Science',                     duration: '10 Weeks', schedule: 'Evening',             enrolled: 1 },
+      { id: 4, name: 'Cybersecurity Basics',                        duration: '8 Weeks',  schedule: 'Weekend',             enrolled: 1 },
+      { id: 5, name: 'Graphic Design',                              duration: '8 Weeks',  schedule: 'Morning',             enrolled: 1 },
+      { id: 6, name: 'Digital Marketing',                           duration: '6 Weeks',  schedule: 'Afternoon',           enrolled: 1 },
+    ];
+
+    var DEMO_INSTRUCTORS = [
+      { id: 1, name: 'Instructor Name', subject: 'Web Development & Programming',    phone: '+254 700 000 001' },
+      { id: 2, name: 'Instructor Name', subject: 'Computer Packages & Office Tools', phone: '+254 700 000 002' },
+      { id: 3, name: 'Instructor Name', subject: 'Cybersecurity & Networking',       phone: '+254 700 000 003' },
+      { id: 4, name: 'Instructor Name', subject: 'Data Science & Python',            phone: '+254 700 000 004' },
+      { id: 5, name: 'Instructor Name', subject: 'Graphic Design & Digital Marketing', phone: '+254 700 000 005' },
+    ];
+
+
+    /* ── Sidebar section switching ───────────────────── */
+    function showSection(id, btn) {
+      document.querySelectorAll('.page-section').forEach(function (s) {
+        s.classList.remove('active');
+      });
+      document.querySelectorAll('.sidebar-link').forEach(function (b) {
+        b.classList.remove('active');
+      });
+      document.getElementById('section-' + id).classList.add('active');
+      if (btn) btn.classList.add('active');
+
+      var titles = {
+        dashboard:   'Dashboard',
+        students:    'Enrolled Students',
+        courses:     'Courses',
+        instructors: 'Instructors'
+      };
+      document.getElementById('topbarTitle').textContent = titles[id] || id;
+
+      if (id === 'students')    loadStudents();
+      if (id === 'courses')     loadCourses();
+      if (id === 'instructors') loadInstructors();
+    }
+
+
+    /* ── Course badge helper ─────────────────────────── */
+    function courseBadge(course) {
+      var map = {
+        'Computer Packages':       'badge-pkg',
+        'Web Development Bootcamp':'badge-web',
+        'Python and Data Science': 'badge-python',
+        'Cybersecurity Basics':    'badge-cyber',
+        'Graphic Design':          'badge-design',
+        'Digital Marketing':       'badge-mktg',
+      };
+      var key = Object.keys(map).find(function (k) { return course.indexOf(k) !== -1; }) || '';
+      var cls = map[key] || 'badge-pkg';
+      return '<span class="course-badge ' + cls + '">' + course + '</span>';
+    }
+
+
+    /* ── Status badge helper ─────────────────────────── */
+    function statusBadge(status) {
+      var cls = status === 'New' ? 'status-new' : status === 'Active' ? 'status-active' : 'status-done';
+      return '<span class="status-dot ' + cls + '">' + status + '</span>';
+    }
+
+
+    /* ── Load dashboard ──────────────────────────────── */
+    function loadDashboard() {
+      /* Stats */
+      document.getElementById('statTotal').textContent      = DEMO_STUDENTS.length;
+      document.getElementById('statMonth').textContent      = DEMO_STUDENTS.filter(function (s) { return s.status === 'New'; }).length;
+      document.getElementById('statCourses').textContent    = DEMO_COURSES.length;
+      document.getElementById('statInstructors').textContent= DEMO_INSTRUCTORS.length;
+
+      /* Recent 5 rows */
+      var tbody = document.getElementById('dashTableBody');
+      tbody.innerHTML = DEMO_STUDENTS.slice(0, 5).map(function (s) {
+        return '<tr>' +
+          '<td class="td-name">' + s.firstName + ' ' + s.lastName + '</td>' +
+          '<td>' + courseBadge(s.course) + '</td>' +
+          '<td class="td-muted">' + s.phone + '</td>' +
+          '<td class="td-muted">' + s.date + '</td>' +
+          '<td>' + statusBadge(s.status) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+
+    /* ── Load students table ─────────────────────────── */
+    var filteredStudents = DEMO_STUDENTS.slice();
+
+    function loadStudents() {
+      filteredStudents = DEMO_STUDENTS.slice();
+      renderStudents(filteredStudents);
+    }
+
+    function filterStudents() {
+      var query   = document.getElementById('studentSearch').value.toLowerCase();
+      var course  = document.getElementById('courseFilter').value;
+      filteredStudents = DEMO_STUDENTS.filter(function (s) {
+        var fullName = (s.firstName + ' ' + s.middleName + ' ' + s.lastName).toLowerCase();
+        var matchQ   = !query  || fullName.includes(query) || s.phone.includes(query) || s.email.toLowerCase().includes(query);
+        var matchC   = !course || s.course.indexOf(course) !== -1;
+        return matchQ && matchC;
+      });
+      renderStudents(filteredStudents);
+    }
+
+    function renderStudents(list) {
+      var tbody = document.getElementById('studentsTableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><p>No students match your search.</p></td></tr>';
+        document.getElementById('studentCount').textContent = 'Showing 0 records';
+        return;
+      }
+      tbody.innerHTML = list.map(function (s, i) {
+        return '<tr>' +
+          '<td class="td-muted">' + (i + 1) + '</td>' +
+          '<td class="td-name">'  + s.firstName + ' ' + (s.middleName ? s.middleName + ' ' : '') + s.lastName + '</td>' +
+          '<td class="td-muted">' + s.idType + ': ' + s.idNumber + '</td>' +
+          '<td>' + s.phone + '</td>' +
+          '<td class="td-muted">' + (s.email || '—') + '</td>' +
+          '<td class="td-muted">' + s.address + '</td>' +
+          '<td>' + courseBadge(s.course) + '</td>' +
+          '<td class="td-muted">' + s.schedule + '</td>' +
+          '<td class="td-muted">' + s.date + '</td>' +
+          '<td>' + statusBadge(s.status) + '</td>' +
+          '<td>' +
+            '<button class="action-btn" onclick="markActive(' + s.id + ')">Activate</button>' +
+            '<button class="action-btn danger" onclick="deleteStudent(' + s.id + ')">Delete</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+      document.getElementById('studentCount').textContent = 'Showing ' + list.length + ' of ' + DEMO_STUDENTS.length + ' records';
+    }
+
+
+    /* ── Student actions ─────────────────────────────── */
+    function markActive(id) {
+      var s = DEMO_STUDENTS.find(function (x) { return x.id === id; });
+      if (s) { s.status = 'Active'; filterStudents(); }
+      /*
+        BACKEND: fetch('/api/admin/students/' + id + '/activate', { method: 'PATCH', ... })
+      */
+    }
+
+    function deleteStudent(id) {
+      if (!confirm('Are you sure you want to delete this enrollment record?')) return;
+      var idx = DEMO_STUDENTS.findIndex(function (x) { return x.id === id; });
+      if (idx !== -1) { DEMO_STUDENTS.splice(idx, 1); filterStudents(); loadDashboard(); }
+      /*
+        BACKEND: fetch('/api/admin/students/' + id, { method: 'DELETE', ... })
+      */
+    }
+
+
+    /* ── Export CSV ──────────────────────────────────── */
+    function exportCSV() {
+      var headers = ['ID','First Name','Middle Name','Last Name','ID Type','ID Number','Phone','Email','Address','Course','Schedule','Date Enrolled','Status'];
+      var rows = filteredStudents.map(function (s) {
+        return [s.id, s.firstName, s.middleName, s.lastName, s.idType, s.idNumber, s.phone, s.email, s.address, s.course, s.schedule, s.date, s.status];
+      });
+      var csv = [headers].concat(rows).map(function (r) {
+        return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+      }).join('\n');
+
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href      = url;
+      a.download  = 'tnict-enrollments-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+
+    /* ── Load courses table ──────────────────────────── */
+    function loadCourses() {
+      var tbody = document.getElementById('coursesTableBody');
+      tbody.innerHTML = DEMO_COURSES.map(function (c, i) {
+        return '<tr>' +
+          '<td class="td-muted">' + (i + 1) + '</td>' +
+          '<td class="td-name">'  + c.name + '</td>' +
+          '<td class="td-muted">' + c.duration + '</td>' +
+          '<td class="td-muted">' + c.schedule + '</td>' +
+          '<td><strong>' + c.enrolled + '</strong> students</td>' +
+          '<td>' +
+            '<button class="action-btn">Edit</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+
+    /* ── Load instructors table ──────────────────────── */
+    function loadInstructors() {
+      var tbody = document.getElementById('instructorsTableBody');
+      tbody.innerHTML = DEMO_INSTRUCTORS.map(function (inst, i) {
+        return '<tr>' +
+          '<td class="td-muted">' + (i + 1) + '</td>' +
+          '<td class="td-name">'  + inst.name + '</td>' +
+          '<td class="td-muted">' + inst.subject + '</td>' +
+          '<td class="td-muted">' + inst.phone + '</td>' +
+          '<td>' +
+            '<button class="action-btn">Edit</button>' +
+            '<button class="action-btn danger">Remove</button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+
+    /* ── Logout ──────────────────────────────────────── */
+    function handleLogout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        sessionStorage.removeItem('adminLoggedIn');
+        sessionStorage.removeItem('adminUser');
+        window.location.href = 'admin-login.html';
+      }
+    }
+
+
+    /* ── Init ────────────────────────────────────────── */
+    (function init() {
+      /* Show logged-in username in sidebar */
+      var user = sessionStorage.getItem('adminUser') || 'admin';
+      document.getElementById('adminUserLabel').textContent = user;
+
+      /* Set date in topbar */
+      document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-KE', {
+        weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      /* Load dashboard data */
+      loadDashboard();
+    })();
+
+  </script>
+
+</body>
+</html>

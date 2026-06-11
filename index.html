@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — Trans-Nzoia Community ICT Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
+</head>
+<body>
+  <!-- ================================================
+       NAVIGATION
+  ================================================ -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-badge">TN</div>
+      <div class="nav-logo-text">
+        Trans-Nzoia Community ICT Hub
+        <small>Empowering Communities Through Technology</small>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="more.html">More</a>
+      <a class="nav-enroll" href="enroll.html">Enroll Now</a>
+    </div>
+  </nav>
+
+
+  <!-- ================================================
+       HOME PAGE
+  ================================================ -->
+
+  <!-- Photo carousel -->
+  <!-- Photo carousel -->
+    <div class="carousel">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide">
+          <img src="images/carousel/photo-1.jpg" alt="Hub interior with motivational wall quotes">
+          <div class="carousel-fade"></div>
+        </div>
+        <div class="carousel-slide">
+          <img src="images/carousel/photo-2.jpg" alt="Classroom with Steve Forbes quote on wall">
+          <div class="carousel-fade"></div>
+        </div>
+        <div class="carousel-slide">
+          <img src="images/carousel/photo-3.jpg" alt="Computer lab with hexagonal quote wall art">
+          <div class="carousel-fade"></div>
+        </div>
+        <div class="carousel-slide">
+          <img src="images/carousel/photo-4.jpg" alt="Hub wall with motivational hexagons">
+          <div class="carousel-fade"></div>
+        </div>
+      </div>
+      <button class="carousel-btn prev" onclick="moveSlide(-1)">&#8249;</button>
+      <button class="carousel-btn next" onclick="moveSlide(1)">&#8250;</button>
+      <div class="carousel-dots">
+        <button class="dot active" onclick="goSlide(0)"></button>
+        <button class="dot"        onclick="goSlide(1)"></button>
+        <button class="dot"        onclick="goSlide(2)"></button>
+        <button class="dot"        onclick="goSlide(3)"></button>
+      </div>
+    </div>
+
+  <!-- Steve Forbes quote from hub wall -->
+  <!-- Steve Forbes quote from hub wall -->
+    <div class="quote-banner">
+      <blockquote>
+        "The real source of wealth and capital in this new era is not material things — it is the human mind,
+        the human spirit, the human imagination, and our faith in the future."
+      </blockquote>
+      <cite>Steve Forbes</cite>
+    </div>
+
+  <!-- Hexagonal quote wall extracted from hub photos -->
+  <!-- Hexagonal quote wall extracted from hub photos -->
+    <div class="quotes-wall">
+      <div class="quotes-wall-inner">
+        <p class="wall-label">Words on our walls &mdash; words in our hearts</p>
+
+        <div class="hex-row">
+          <div class="hexagon white">
+            <p>Tonight, I Dream.<br>Tomorrow,<br><strong>I Do.</strong></p>
+          </div>
+          <div class="hexagon warm">
+            <p>Success doesn't come to you &mdash;<br><strong>You Go to It.</strong></p>
+          </div>
+          <div class="hexagon white">
+            <p>Good Things Come<br>to Those Who<br><strong>Hustle.</strong></p>
+          </div>
+        </div>
+
+        <div class="hex-row">
+          <div class="hexagon warm">
+            <p>Computers have lots of<br>memory but<br><strong>no imagination.</strong><em>Bill Gates</em></p>
+          </div>
+          <div class="hexagon white">
+            <p><strong>Hard Work</strong><br>is the formula<br>for <strong>Success.</strong></p>
+          </div>
+          <div class="hexagon warm">
+            <p>Do what is <strong>Right,</strong><br>not what<br>is easy.</p>
+          </div>
+          <div class="hexagon white">
+            <p>Your brain works like a<br>computer &mdash; make sure<br>you are<br><strong>the only one<br>programming it.</strong><em>The Minds Journal</em></p>
+          </div>
+        </div>
+
+        <div class="hex-row">
+          <div class="hexagon white">
+            <p>Focus on<br>the <strong>Goal,</strong><br>not the Obstacles.</p>
+          </div>
+          <div class="hexagon warm">
+            <p>Technology in the hands<br>of great teachers<br>can be<br><strong>Transformational.</strong><em>George Couros</em></p>
+          </div>
+          <div class="hexagon white">
+            <p><strong>Take the Risk</strong><br>or Lose<br>the Chance.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  <!-- William Ruto quotes from hub wall photo -->
+  <!-- William Ruto quotes from hub wall photo -->
+    <div class="ruto-strip">
+      <div class="ruto-strip-inner">
+        <div class="ruto-card">
+          <p>"We have a chance to make a Kenya where hardwork can be rewarded regardless of who you are and where you come from."</p>
+          <cite>William Ruto</cite>
+        </div>
+        <div class="ruto-card">
+          <p>"Economic change is not always about new activities but new ideas that give more people a chance to participate in wealth creation."</p>
+          <cite>William Ruto</cite>
+        </div>
+        <div class="ruto-card amber-accent">
+          <p>"When I talk about hustling I am not joking. In 1978 I was selling chicken. At that time I did not believe that I could be somebody."</p>
+          <cite>William Ruto</cite>
+        </div>
+      </div>
+    </div>
+
+  
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid" style="grid-template-columns:1fr; max-width:400px;">
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p>Kitale Town, Trans-Nzoia County</p>
+        <p>+254 700 000 000</p>
+        <p>info@transnzoiaict.co.ke</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2025 Trans-Nzoia Community ICT Hub. A project of Hon. Allan Chesang. All rights reserved.
+    </div>
+  </footer>
+
+
+  <script src="js/carousel.js"></script>
+</body>
+</html>
