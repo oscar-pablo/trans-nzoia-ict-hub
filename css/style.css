@@ -59,8 +59,8 @@
     }
 
     .nav-logo-badge {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   background: var(--amber);
   border-radius: 50%;
   display: flex;
@@ -73,6 +73,13 @@
   flex-shrink: 0;
   overflow: hidden;
   padding: 2px;
+}
+
+    .nav-logo-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
     
 
@@ -1246,10 +1253,190 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* Responsive — shrinks gracefully on small screens */
-@media (max-width: 480px) {
-  .admin-portal-btn {
-    font-size: 0.7rem;
-    padding: 6px 14px;
+/* ════════════════════════════════════════════════
+   HAMBURGER / MOBILE NAV
+════════════════════════════════════════════════ */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.nav-hamburger:hover { background: rgba(255,255,255,0.12); }
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+  transform-origin: center;
+}
+/* Animate to X when active */
+.nav-hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.nav-hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE — TABLET  (≤ 1024px)
+════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .chesang-hero {
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
   }
+  .hexagon {
+    width: 150px;
+    height: 173px;
+  }
+  .instructor-card {
+    min-width: calc(50% - 8px);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE — SMALL TABLET / LARGE PHONE (≤ 768px)
+════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Nav — hamburger activates */
+  .nav { padding: 0 1.2rem; height: 60px; }
+  .nav-hamburger { display: flex; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--red);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.8rem 1.2rem 1rem;
+    gap: 4px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    z-index: 99;
+  }
+  .nav-links.open { display: flex; }
+  .nav-link  { padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; }
+  .nav-enroll {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .nav-logo-text { font-size: 0.8rem; }
+  .nav-logo-text small { display: none; }
+
+  /* Carousel */
+  .carousel { height: 280px; }
+  .instr-carousel-wrap { height: 280px; }
+  .carousel-btn { width: 36px; height: 36px; font-size: 1.2rem; }
+  .instr-btn    { width: 36px; height: 36px; font-size: 1.2rem; }
+
+  /* Quote Banner */
+  .quote-banner { padding: 2rem 1.2rem; }
+  .quote-banner blockquote { font-size: 1rem; }
+
+  /* Hex Wall */
+  .quotes-wall  { padding: 2.5rem 1rem; }
+  .hex-row      { gap: 8px; }
+  .hexagon { width: 130px; height: 150px; padding: 24px 14px; }
+  .hexagon p { font-size: 0.62rem; }
+
+  /* Ruto Strip */
+  .ruto-strip-inner { grid-template-columns: 1fr; }
+
+  /* Hon. Chesang hero */
+  .chesang-hero { grid-template-columns: 1fr; min-height: unset; }
+  .chesang-photo-col { height: 260px; }
+  .chesang-text-col  { padding: 2rem 1.4rem; }
+  .chesang-text-col h1 { font-size: 1.4rem; }
+
+  /* Mission grid */
+  .mission-grid { grid-template-columns: 1fr; }
+
+  /* Location details */
+  .location-details { grid-template-columns: 1fr; }
+
+  /* Enrollment form */
+  .form-row { grid-template-columns: 1fr; }
+  .form-outer { padding: 1.5rem 1rem; }
+  .enroll-hero h1 { font-size: 1.6rem; }
+
+  /* Section */
+  .section { padding: 2.5rem 1.2rem; }
+  .section-title { font-size: 1.35rem; }
+
+  /* Footer */
+  .footer { padding: 2rem 1.2rem 1rem; }
+  .footer-grid { grid-template-columns: 1fr; }
+
+  /* Instructor cards */
+  .instructor-card { min-width: calc(100% - 0px); }
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE — PHONE  (≤ 480px)
+════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  /* Nav */
+  .nav { height: 56px; }
+  .nav-links { top: 56px; }
+  .nav-logo-badge { width: 42px; height: 42px; }
+
+  /* Carousel */
+  .carousel { height: 220px; }
+  .instr-carousel-wrap { height: 230px; }
+  .carousel-btn.prev { left: 8px; }
+  .carousel-btn.next { right: 8px; }
+
+  /* Hexagons — switch to single column list-style */
+  .hex-row { flex-direction: column; align-items: center; gap: 10px; }
+  .hexagon { width: 85vw; max-width: 320px; height: auto; clip-path: none; border-radius: 12px; padding: 1.2rem 1rem; }
+  .hexagon p { font-size: 0.78rem; }
+
+  /* Quote */
+  .quote-banner blockquote { font-size: 0.9rem; line-height: 1.6; }
+
+  /* Chesang hero */
+  .chesang-photo-col { height: 200px; }
+  .chesang-text-col  { padding: 1.5rem 1rem; }
+  .chesang-text-col h1 { font-size: 1.2rem; }
+  .chesang-text-col h2 { font-size: 0.78rem; }
+
+  /* Enroll */
+  .enroll-hero { padding: 2.5rem 1rem; }
+  .enroll-hero h1 { font-size: 1.4rem; }
+  .enroll-quote-bar { padding: 1.4rem 1rem; }
+  .enroll-quote-bar q { font-size: 0.9rem; }
+  .form-card { padding: 1.4rem 1rem; }
+  .id-toggle { flex-direction: column; }
+  .id-option { flex: unset; }
+
+  /* Admin portal */
+  .admin-portal-btn { font-size: 0.7rem; padding: 6px 14px; }
+
+  /* Footer */
+  .footer-bottom { font-size: 0.68rem; }
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE — VERY SMALL PHONES (≤ 360px)
+════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  .nav-logo-text { font-size: 0.7rem; }
+  .carousel { height: 180px; }
+  .chesang-photo-col { height: 170px; }
+  .enroll-hero h1 { font-size: 1.2rem; }
+  .section-title { font-size: 1.15rem; }
 }

@@ -44,7 +44,7 @@ if ($id <= 0 || empty($action)) {
     exit;
 }
 
-require_once 'db.php';
+require_once 'page_db.php';
 
 try {
     // Check if enrollment exists

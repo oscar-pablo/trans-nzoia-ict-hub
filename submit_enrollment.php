@@ -77,7 +77,7 @@ if (empty($course)) {
 }
 
 // Connect to database and insert enrollment
-require_once 'db.php';
+require_once 'page_db.php';
 
 try {
     $sql = "INSERT INTO enrollments (first_name, middle_name, last_name, has_id, id_type, id_number, phone, email, address, course, schedule, status) 

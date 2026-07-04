@@ -3,7 +3,7 @@ session_start();
 
 // If already logged in, go straight to admin dashboard
 if (isset($_SESSION['admin_id'])) {
-    header("Location: admin_dashboard.php");
+    header("Location: page_admin_dashboard.php");
     exit;
 }
 
@@ -16,6 +16,7 @@ $error = $_GET['error'] ?? '';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login — Trans-Nzoia Community ICT Hub</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,14 +54,6 @@ $error = $_GET['error'] ?? '';
       width: 100%;
       max-width: 420px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-    }
-    .login-card::before {
-      content: '';
-      display: block;
-      height: 4px;
-      background: linear-gradient(90deg, var(--red), var(--orange), var(--amber));
-      margin: -2.5rem -2rem 2rem;
-      border-radius: 16px 16px 0 0;
     }
     .login-logo {
       display: flex;
@@ -117,6 +110,45 @@ $error = $_GET['error'] ?? '';
     .login-btn:hover  { background: var(--red-hover); }
     .login-btn:active { transform: scale(0.99); }
     .login-note { text-align: center; font-size: 0.74rem; color: rgba(255,255,255,0.35); margin-top: 1.5rem; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      text-decoration: none;
+      margin-top: 1.3rem;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--navy);
+      background: var(--amber-pale);
+      border-color: var(--amber);
+    }
+    .back-btn svg { flex-shrink: 0; }
+    .login-logo-badge {
+      width: 44px; height: 44px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      padding: 2px;
+    }
+    .login-logo-badge img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      .login-card { padding: 2rem 1.2rem; }
+      .login-heading { font-size: 1.3rem; }
+    }
   </style>
 </head>
 <body>
@@ -124,7 +156,9 @@ $error = $_GET['error'] ?? '';
   <div class="login-card">
 
     <div class="login-logo">
-      <div class="login-logo-badge">TN</div>
+      <div class="login-logo-badge">
+        <img src="images/favicon.png" alt="Trans-Nzoia ICT Hub logo">
+      </div>
       <div class="login-logo-text">
         Trans-Nzoia Community ICT Hub
         <small>Admin Portal</small>
@@ -142,7 +176,7 @@ $error = $_GET['error'] ?? '';
     <?php endif; ?>
 
     <!-- Form posts directly to login.php -->
-    <form action="login.php" method="POST">
+    <form action="p_login.php" method="POST">
 
       <div class="form-group">
         <label class="form-label" for="username">Username</label>
@@ -169,6 +203,12 @@ $error = $_GET['error'] ?? '';
       <button class="login-btn" type="submit">Sign In to Admin Panel</button>
 
     </form>
+
+    <a href="index.html" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back to Home
+    </a>
+
   </div>
 
   <p class="login-note">Restricted access &mdash; authorised personnel only.</p>

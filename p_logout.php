@@ -21,6 +21,6 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redirect to admin login screen
-header("Location: admin-login.php");
+header("Location: page_admin-login.php");
 exit;
 ?>

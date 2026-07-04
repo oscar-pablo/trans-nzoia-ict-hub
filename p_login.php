@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once 'db.php';
+require_once 'page_db.php';
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: admin-login.php");
+    header("Location: page_admin-login.php");
     exit;
 }
 
@@ -13,7 +13,7 @@ $password = trim($_POST['password'] ?? '');
 
 // Empty field check
 if (empty($username) || empty($password)) {
-    header("Location: admin-login.php?error=empty");
+    header("Location: page_admin-login.php?error=empty");
     exit;
 }
 
@@ -50,12 +50,12 @@ if ($user) {
         $_SESSION['admin_name'] = $user['username'];
         $_SESSION['logged_in']  = true;
 
-        header("Location: admin_dashboard.php");
+        header("Location: page_admin_dashboard.php");
         exit;
     }
 }
 
 // Login failed — keep error message generic (don't reveal if username exists)
-header("Location: admin-login.php?error=invalid&username=" . urlencode($username));
+header("Location: page_admin-login.php?error=invalid&username=" . urlencode($username));
 exit;
 ?>
