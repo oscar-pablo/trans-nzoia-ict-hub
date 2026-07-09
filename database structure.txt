@@ -1,0 +1,50 @@
+-- -------------------------------------------------------------
+-- Database: trans_nzoia_ict_hub
+-- -------------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS trans_nzoia_ict_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE trans_nzoia_ict_hub;
+
+-- -------------------------------------------------------------
+-- Table: admins
+-- -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS admins (
+    id                 INT AUTO_INCREMENT PRIMARY KEY,
+    username           VARCHAR(100) NOT NULL UNIQUE,
+    full_name          VARCHAR(100) NOT NULL,
+    password           VARCHAR(255) NOT NULL,
+    email              VARCHAR(100) NOT NULL UNIQUE,
+    security_question_1 VARCHAR(255) DEFAULT NULL,
+    security_answer_1   VARCHAR(255) DEFAULT NULL,
+    security_question_2 VARCHAR(255) DEFAULT NULL,
+    security_answer_2   VARCHAR(255) DEFAULT NULL,
+    security_question_3 VARCHAR(255) DEFAULT NULL,
+    security_answer_3   VARCHAR(255) DEFAULT NULL,
+    reset_token        VARCHAR(255) DEFAULT NULL,
+    reset_token_expiry DATETIME     DEFAULT NULL,
+    created_at         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- -------------------------------------------------------------
+-- Table: enrollments
+-- -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS enrollments (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    first_name  VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100) DEFAULT NULL,
+    last_name   VARCHAR(100) NOT NULL,
+    has_id      TINYINT(1)   DEFAULT 1,
+    id_type     VARCHAR(50)  DEFAULT NULL,
+    id_number   VARCHAR(100) DEFAULT NULL,
+    phone       VARCHAR(20)  NOT NULL,
+    email       VARCHAR(100) DEFAULT NULL,
+    address     VARCHAR(255) NOT NULL,
+    course      VARCHAR(100) NOT NULL,
+    schedule    VARCHAR(50)  DEFAULT NULL,
+    status      VARCHAR(20)  DEFAULT 'Pending',
+    created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Optional indexes for faster querying on the dashboard
+CREATE INDEX idx_enroll_status   ON enrollments(status);
+CREATE INDEX idx_enroll_course   ON enrollments(course);
+CREATE INDEX idx_enroll_schedule ON enrollments(schedule);

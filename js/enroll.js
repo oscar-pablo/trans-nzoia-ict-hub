@@ -118,7 +118,7 @@ function handleSubmit() {
   };
 
   // Submit via AJAX Fetch POST
-  fetch('submit_enrollment.php', {
+  fetch('yz/submit_enrollment.php', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

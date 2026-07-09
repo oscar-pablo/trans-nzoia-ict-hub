@@ -101,6 +101,10 @@ $error = $_GET['error'] ?? '';
       background: #FDECEA; border: 1px solid #FFCDD2; border-radius: 8px;
       padding: 10px 14px; font-size: 0.8rem; color: var(--error); margin-bottom: 1rem;
     }
+    .success-msg {
+      background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 8px;
+      padding: 10px 14px; font-size: 0.8rem; color: #2E7D32; margin-bottom: 1rem;
+    }
     .login-btn {
       width: 100%; background: var(--red); color: var(--white); border: none;
       padding: 13px; border-radius: 10px; font-size: 0.97rem; font-weight: 700;
@@ -173,6 +177,8 @@ $error = $_GET['error'] ?? '';
       <div class="error-msg">Incorrect username or password. Please try again.</div>
     <?php elseif ($error === 'empty'): ?>
       <div class="error-msg">Please enter both your username and password.</div>
+    <?php elseif (isset($_GET['reset']) && $_GET['reset'] === 'success'): ?>
+      <div class="success-msg">Your password has been reset successfully. Please log in with your new password.</div>
     <?php endif; ?>
 
     <!-- Form posts directly to login.php -->
@@ -197,6 +203,9 @@ $error = $_GET['error'] ?? '';
             autocomplete="current-password" required
           >
           <button class="toggle-pw" onclick="togglePassword()" type="button" id="togglePwBtn">Show</button>
+        </div>
+        <div style="text-align: right; margin-top: 6px;">
+          <a href="page_forgot-password.php" style="font-size: 0.78rem; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--navy)'" onmouseout="this.style.color='var(--muted)'">Forgot Password?</a>
         </div>
       </div>
 

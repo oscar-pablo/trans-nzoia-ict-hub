@@ -19,8 +19,6 @@ require_once 'page_db.php';
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     // Retrieve current filters to export the filtered set
     $search   = trim($_GET['search'] ?? '');
-    $course   = trim($_GET['course'] ?? '');
-    $status   = trim($_GET['status'] ?? '');
     $schedule = trim($_GET['schedule'] ?? '');
 
     $sql = "SELECT id, first_name, middle_name, last_name, has_id, id_type, id_number, phone, email, address, course, schedule, status, created_at FROM enrollments WHERE 1=1";
@@ -29,14 +27,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     if ($search !== '') {
         $sql .= " AND (first_name LIKE :search OR middle_name LIKE :search OR last_name LIKE :search OR phone LIKE :search OR id_number LIKE :search OR email LIKE :search OR address LIKE :search)";
         $params[':search'] = "%$search%";
-    }
-    if ($course !== '') {
-        $sql .= " AND course = :course";
-        $params[':course'] = $course;
-    }
-    if ($status !== '') {
-        $sql .= " AND status = :status";
-        $params[':status'] = $status;
     }
     if ($schedule !== '') {
         $sql .= " AND schedule = :schedule";
@@ -105,6 +95,10 @@ try {
     // Course counts for sidebar widget
     $courseStatsStmt = $pdo->query("SELECT course, COUNT(*) as count FROM enrollments GROUP BY course ORDER BY count DESC");
     $courseStats = $courseStatsStmt->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch logged-in admin details for security profile
+    $adminProfileStmt = $pdo->prepare("SELECT email, security_question_1, security_question_2, security_question_3 FROM admins WHERE id = :id LIMIT 1");
+    $adminProfileStmt->execute([':id' => $_SESSION['admin_id']]);
+    $adminProfile = $adminProfileStmt->fetch(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     die("Database stats load failed: " . $e->getMessage());
@@ -112,8 +106,6 @@ try {
 
 // ── DYNAMIC FILTERING & SEARCH ────────────────────────────────────────────
 $searchFilter   = trim($_GET['search'] ?? '');
-$courseFilter   = trim($_GET['course'] ?? '');
-$statusFilter   = trim($_GET['status'] ?? '');
 $scheduleFilter = trim($_GET['schedule'] ?? '');
 
 $sql = "SELECT * FROM enrollments WHERE 1=1";
@@ -122,14 +114,6 @@ $params = [];
 if ($searchFilter !== '') {
     $sql .= " AND (first_name LIKE :search OR middle_name LIKE :search OR last_name LIKE :search OR phone LIKE :search OR id_number LIKE :search OR email LIKE :search OR address LIKE :search)";
     $params[':search'] = "%$searchFilter%";
-}
-if ($courseFilter !== '') {
-    $sql .= " AND course = :course";
-    $params[':course'] = $courseFilter;
-}
-if ($statusFilter !== '') {
-    $sql .= " AND status = :status";
-    $params[':status'] = $statusFilter;
 }
 if ($scheduleFilter !== '') {
     $sql .= " AND schedule = :schedule";
@@ -438,6 +422,161 @@ try {
     }
     .btn-export:hover {
       background: var(--green);
+    }
+
+    .btn-export-pdf {
+      background: var(--red);
+      color: var(--white);
+    }
+    .btn-export-pdf:hover {
+      background: var(--red-hover);
+    }
+
+    .btn-certificates {
+      background: var(--navy-mid);
+      border: 1.5px solid var(--amber);
+      color: var(--amber);
+    }
+    .btn-certificates:hover {
+      background: var(--amber);
+      color: var(--navy-dark);
+    }
+
+    /* ── CERTIFICATE PRINT MODAL ───────────────────────────────── */
+    .cert-mode-choice {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 1.2rem;
+    }
+
+    .cert-mode-card {
+      background: rgba(0, 30, 48, 0.4);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cert-mode-card:hover {
+      border-color: var(--amber);
+    }
+
+    .cert-mode-card.active {
+      border-color: var(--amber);
+      background: rgba(252, 191, 73, 0.1);
+    }
+
+    .cert-mode-card .cert-mode-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .cert-mode-card .cert-mode-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--white);
+    }
+
+    .cert-mode-card .cert-mode-sub {
+      font-size: 0.75rem;
+      color: var(--muted-light);
+      margin-top: 3px;
+    }
+
+    .cert-student-list {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .cert-student-list.visible {
+      display: block;
+    }
+
+    .cert-student-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.85rem;
+    }
+
+    .cert-student-row:last-child {
+      border-bottom: none;
+    }
+
+    .cert-student-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--amber);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .cert-student-name {
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .cert-student-meta {
+      font-size: 0.72rem;
+      color: var(--muted-light);
+    }
+
+    /* ── PDF FIELD-SELECTION MODAL ─────────────────────────────── */
+    .pdf-fields-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 1rem 0 1.4rem;
+    }
+
+    .pdf-field-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 30, 48, 0.4);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      user-select: none;
+      transition: border-color 0.2s;
+    }
+
+    .pdf-field-option:hover {
+      border-color: var(--amber);
+    }
+
+    .pdf-field-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--amber);
+      cursor: pointer;
+    }
+
+    .pdf-select-toggle {
+      background: none;
+      border: none;
+      color: var(--amber);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    .pdf-modal-hint {
+      font-size: 0.82rem;
+      color: var(--muted-light);
+      margin-bottom: 0.4rem;
     }
 
     /* ── DYNAMIC TABLE ─────────────────────────────────────────── */
@@ -777,7 +916,8 @@ try {
     </div>
     <div class="admin-profile">
       <div class="admin-name">Welcome, <span><?php echo htmlspecialchars($_SESSION['admin_name']); ?></span></div>
-      <a href="p_logout.php" class="logout-btn">Log Out</a>
+      <button onclick="openSecurityModal()" class="logout-btn" style="background: rgba(252, 191, 73, 0.12); border-color: var(--amber); color: #ffeaa7;">Security Profile</button>
+      <a href="index.html" class="logout-btn">Log Out</a>
     </div>
   </header>
 
@@ -821,29 +961,6 @@ try {
         </div>
 
         <div class="control-group">
-          <label class="control-label" for="course">Course Filter</label>
-          <select class="input-field" id="course" name="course">
-            <option value="">All Courses</option>
-            <option value="Computer Packages (Word, Excel, PowerPoint)" <?php echo $courseFilter === 'Computer Packages (Word, Excel, PowerPoint)' ? 'selected' : ''; ?>>Computer Packages</option>
-            <option value="Web Development Bootcamp" <?php echo $courseFilter === 'Web Development Bootcamp' ? 'selected' : ''; ?>>Web Dev Bootcamp</option>
-            <option value="Python and Data Science" <?php echo $courseFilter === 'Python and Data Science' ? 'selected' : ''; ?>>Python & Data Science</option>
-            <option value="Cybersecurity Basics" <?php echo $courseFilter === 'Cybersecurity Basics' ? 'selected' : ''; ?>>Cybersecurity Basics</option>
-            <option value="Graphic Design" <?php echo $courseFilter === 'Graphic Design' ? 'selected' : ''; ?>>Graphic Design</option>
-            <option value="Digital Marketing" <?php echo $courseFilter === 'Digital Marketing' ? 'selected' : ''; ?>>Digital Marketing</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label class="control-label" for="status">Status Filter</label>
-          <select class="input-field" id="status" name="status">
-            <option value="">All Statuses</option>
-            <option value="Pending" <?php echo $statusFilter === 'Pending' ? 'selected' : ''; ?>>Pending</option>
-            <option value="Approved" <?php echo $statusFilter === 'Approved' ? 'selected' : ''; ?>>Approved</option>
-            <option value="Rejected" <?php echo $statusFilter === 'Rejected' ? 'selected' : ''; ?>>Rejected</option>
-          </select>
-        </div>
-
-        <div class="control-group">
           <label class="control-label" for="schedule">Schedule</label>
           <select class="input-field" id="schedule" name="schedule">
             <option value="">All Schedules</option>
@@ -858,12 +975,28 @@ try {
           <button type="submit" class="btn btn-primary">Filter</button>
           <a href="page_admin_dashboard.php" class="btn btn-secondary">Reset</a>
           <a 
-            href="page_admin_dashboard.php?export=csv&search=<?php echo urlencode($searchFilter); ?>&course=<?php echo urlencode($courseFilter); ?>&status=<?php echo urlencode($statusFilter); ?>&schedule=<?php echo urlencode($scheduleFilter); ?>" 
+            href="page_admin_dashboard.php?export=csv&search=<?php echo urlencode($searchFilter); ?>&schedule=<?php echo urlencode($scheduleFilter); ?>" 
             class="btn btn-export" 
             title="Download records as spreadsheet CSV"
           >
             Export CSV
           </a>
+          <button 
+            type="button"
+            class="btn btn-export-pdf" 
+            title="Choose fields and download as a printable PDF"
+            onclick="openPdfModal()"
+          >
+            Export PDF
+          </button>
+          <button 
+            type="button"
+            class="btn btn-certificates" 
+            title="Generate certificates and transcripts for students"
+            onclick="openCertModal()"
+          >
+            Print Certificates
+          </button>
         </div>
       </form>
     </div>
@@ -1056,6 +1189,156 @@ try {
     </div>
   </div>
 
+  <!-- ── PDF EXPORT: FIELD SELECTION MODAL ── -->
+  <div class="modal-overlay" id="pdfModalOverlay" onclick="closePdfModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h4 class="modal-title">Export Registrations to PDF</h4>
+        <button class="modal-close" onclick="closePdfModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="pdf-modal-hint">
+          Choose which fields to include in the printable PDF. The current search/filter selection on the dashboard will be applied to the export.
+        </p>
+        <button type="button" class="pdf-select-toggle" onclick="togglePdfFields()" id="pdfToggleBtn">Deselect All</button>
+
+        <div class="pdf-fields-grid" id="pdfFieldsGrid">
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="first_name" checked> First Name</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="middle_name" checked> Middle Name</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="last_name" checked> Last Name</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="id_number" checked> ID / Cert Number</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="phone" checked> Phone</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="email" checked> Email</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="course" checked> Course</label>
+          <label class="pdf-field-option"><input type="checkbox" class="pdf-field-cb" value="schedule" checked> Schedule</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePdfModal()">Cancel</button>
+        <button class="btn btn-export-pdf" onclick="generatePdf()">Generate PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CERTIFICATE PRINT MODAL ── -->
+  <div class="modal-overlay" id="certModalOverlay" onclick="closeCertModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h4 class="modal-title">Print Certificates &amp; Transcripts</h4>
+        <button class="modal-close" onclick="closeCertModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="pdf-modal-hint">
+          Each student gets a Certificate of Completion and an Academic Transcript. Choose who to generate documents for.
+        </p>
+
+        <div class="cert-mode-choice">
+          <div class="cert-mode-card active" id="certModeAllCard" onclick="setCertMode('all')">
+            <div class="cert-mode-icon">📜</div>
+            <div class="cert-mode-title">All Approved Students</div>
+            <div class="cert-mode-sub">Everyone marked "Approved" in the list below</div>
+          </div>
+          <div class="cert-mode-card" id="certModeSelectCard" onclick="setCertMode('select')">
+            <div class="cert-mode-icon">☑️</div>
+            <div class="cert-mode-title">Select Specific Students</div>
+            <div class="cert-mode-sub">Pick individual names from the list</div>
+          </div>
+        </div>
+
+        <div class="cert-student-list" id="certStudentList">
+          <?php foreach ($enrollments as $student): ?>
+            <label class="cert-student-row">
+              <input 
+                type="checkbox" 
+                class="cert-student-cb" 
+                value="<?php echo (int)$student['id']; ?>"
+                <?php echo strtolower($student['status']) === 'approved' ? 'checked' : ''; ?>
+              >
+              <div>
+                <div class="cert-student-name"><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></div>
+                <div class="cert-student-meta">
+                  <?php echo htmlspecialchars($student['course']); ?> &middot; <?php echo htmlspecialchars($student['status']); ?>
+                </div>
+              </div>
+            </label>
+          <?php endforeach; ?>
+          <?php if (empty($enrollments)): ?>
+            <div class="cert-student-row">No students match the current dashboard filters.</div>
+          <?php endif; ?>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCertModal()">Cancel</button>
+        <button class="btn btn-certificates" onclick="generateCertificates()">Generate Documents</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECURITY PROFILE MODAL ── -->
+  <div class="modal-overlay" id="securityModalOverlay" onclick="closeSecurityModal()">
+    <div class="modal-card" style="max-width: 520px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h4 class="modal-title">Security Profile Settings</h4>
+        <button class="modal-close" onclick="closeSecurityModal()">&times;</button>
+      </div>
+      <form id="securityProfileForm" style="margin: 0;">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; max-height: 70vh; overflow-y: auto;">
+          <p class="pdf-modal-hint" style="margin-bottom: 0.5rem;">
+            Update your account's email address, security questions/answers, or password. You must verify your current password to save changes.
+          </p>
+
+          <div id="sec-error-msg" class="error-msg" style="display: none; background: #FDECEA; border: 1px solid #FFCDD2; border-radius: 8px; padding: 10px 14px; font-size: 0.8rem; color: var(--red); line-height: 1.4;"></div>
+          <div id="sec-success-msg" class="success-msg" style="display: none; background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 8px; padding: 10px 14px; font-size: 0.8rem; color: #2E7D32; line-height: 1.4;"></div>
+
+          <!-- Email -->
+          <div class="info-group full-width" style="display: flex; flex-direction: column; gap: 4px;">
+            <label class="control-label" for="sec_email">Admin Email Address</label>
+            <input type="email" class="input-field" id="sec_email" name="email" value="<?php echo htmlspecialchars($adminProfile['email'] ?? ''); ?>" required>
+          </div>
+
+          <!-- Question 1 -->
+          <div class="info-group full-width" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--glass-border); padding-top: 0.8rem;">
+            <label class="control-label" for="sec_q1">Security Question 1</label>
+            <input type="text" class="input-field" id="sec_q1" name="q1" value="<?php echo htmlspecialchars($adminProfile['security_question_1'] ?? 'What was the name of your first school?'); ?>" required>
+            <input type="password" class="input-field" style="margin-top: 5px;" id="sec_a1" name="a1" placeholder="Enter new answer (leave blank to keep current)">
+          </div>
+
+          <!-- Question 2 -->
+          <div class="info-group full-width" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--glass-border); padding-top: 0.8rem;">
+            <label class="control-label" for="sec_q2">Security Question 2</label>
+            <input type="text" class="input-field" id="sec_q2" name="q2" value="<?php echo htmlspecialchars($adminProfile['security_question_2'] ?? 'What is your favorite color?'); ?>" required>
+            <input type="password" class="input-field" style="margin-top: 5px;" id="sec_a2" name="a2" placeholder="Enter new answer (leave blank to keep current)">
+          </div>
+
+          <!-- Question 3 -->
+          <div class="info-group full-width" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--glass-border); padding-top: 0.8rem;">
+            <label class="control-label" for="sec_q3">Security Question 3</label>
+            <input type="text" class="input-field" id="sec_q3" name="q3" value="<?php echo htmlspecialchars($adminProfile['security_question_3'] ?? 'In what city or town was your first job?'); ?>" required>
+            <input type="password" class="input-field" style="margin-top: 5px;" id="sec_a3" name="a3" placeholder="Enter new answer (leave blank to keep current)">
+          </div>
+
+          <!-- New Password -->
+          <div class="info-group full-width" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--glass-border); padding-top: 0.8rem;">
+            <label class="control-label" for="sec_new_password">New Password (Optional)</label>
+            <input type="password" class="input-field" id="sec_new_password" name="new_password" placeholder="Enter new password (min 6 characters)">
+            <input type="password" class="input-field" style="margin-top: 5px;" id="sec_confirm_password" name="confirm_password" placeholder="Confirm new password">
+          </div>
+
+          <!-- Verification Current Password -->
+          <div class="info-group full-width" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--amber); padding-top: 0.8rem;">
+            <label class="control-label" for="sec_current_password" style="color: var(--amber);">Current Password (Required to Save)</label>
+            <input type="password" class="input-field" style="border-color: var(--amber);" id="sec_current_password" name="current_password" placeholder="Enter your current password" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSecurityModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveSecurityBtn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ── SYSTEM TOASTS CONTAINER ── -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -1214,6 +1497,78 @@ try {
       document.getElementById('detailModalOverlay').classList.remove('active');
     }
 
+    // ── PDF Export: field-selection modal ──
+    function openPdfModal() {
+      document.getElementById('pdfModalOverlay').classList.add('active');
+    }
+
+    function closePdfModal() {
+      document.getElementById('pdfModalOverlay').classList.remove('active');
+    }
+
+    function togglePdfFields() {
+      const boxes = document.querySelectorAll('.pdf-field-cb');
+      const toggleBtn = document.getElementById('pdfToggleBtn');
+      const shouldSelectAll = toggleBtn.textContent.trim() === 'Select All';
+      boxes.forEach(cb => cb.checked = shouldSelectAll);
+      toggleBtn.textContent = shouldSelectAll ? 'Deselect All' : 'Select All';
+    }
+
+    function generatePdf() {
+      const checked = Array.from(document.querySelectorAll('.pdf-field-cb:checked')).map(cb => cb.value);
+
+      if (checked.length === 0) {
+        showToast('Please select at least one field to include in the PDF.', 'error');
+        return;
+      }
+
+      // Carry over the current dashboard filters so the PDF matches the visible list
+      const params = new URLSearchParams();
+      params.set('search', <?php echo json_encode($searchFilter); ?>);
+      params.set('schedule', <?php echo json_encode($scheduleFilter); ?>);
+      checked.forEach(field => params.append('fields[]', field));
+
+      window.location.href = 'export_pdf.php?' + params.toString();
+      closePdfModal();
+    }
+
+    // ── Certificate & Transcript printing ──
+    let certMode = 'all';
+
+    function openCertModal() {
+      document.getElementById('certModalOverlay').classList.add('active');
+    }
+
+    function closeCertModal() {
+      document.getElementById('certModalOverlay').classList.remove('active');
+    }
+
+    function setCertMode(mode) {
+      certMode = mode;
+      document.getElementById('certModeAllCard').classList.toggle('active', mode === 'all');
+      document.getElementById('certModeSelectCard').classList.toggle('active', mode === 'select');
+      document.getElementById('certStudentList').classList.toggle('visible', mode === 'select');
+    }
+
+    function generateCertificates() {
+      const params = new URLSearchParams();
+
+      if (certMode === 'all') {
+        params.set('mode', 'all');
+      } else {
+        const selectedIds = Array.from(document.querySelectorAll('.cert-student-cb:checked')).map(cb => cb.value);
+        if (selectedIds.length === 0) {
+          showToast('Please select at least one student.', 'error');
+          return;
+        }
+        params.set('mode', 'select');
+        selectedIds.forEach(id => params.append('ids[]', id));
+      }
+
+      window.location.href = 'print_certificates.php?' + params.toString();
+      closeCertModal();
+    }
+
     // ── Toast notification system ──
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
@@ -1233,6 +1588,89 @@ try {
         }, 300);
       }, 4000);
     }
+
+    // ── Security Profile Modal functions ──
+    function openSecurityModal() {
+      document.getElementById('securityModalOverlay').classList.add('active');
+      document.getElementById('sec-error-msg').style.display = 'none';
+      document.getElementById('sec-success-msg').style.display = 'none';
+      document.getElementById('sec_current_password').value = '';
+      document.getElementById('sec_new_password').value = '';
+      document.getElementById('sec_confirm_password').value = '';
+    }
+
+    function closeSecurityModal() {
+      document.getElementById('securityModalOverlay').classList.remove('active');
+    }
+
+    document.getElementById('securityProfileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('sec_email').value.trim();
+      const currentPassword = document.getElementById('sec_current_password').value;
+      const newPassword = document.getElementById('sec_new_password').value;
+      const confirmPassword = document.getElementById('sec_confirm_password').value;
+
+      const errorMsg = document.getElementById('sec-error-msg');
+      const successMsg = document.getElementById('sec-success-msg');
+
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+
+      if (newPassword && newPassword !== confirmPassword) {
+        errorMsg.textContent = 'New passwords do not match.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      if (newPassword && newPassword.length < 6) {
+        errorMsg.textContent = 'New password must be at least 6 characters.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      const saveBtn = document.getElementById('saveSecurityBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      const formData = new FormData(this);
+
+      fetch('api_update-profile.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+
+        if (data.status === 'success') {
+          successMsg.textContent = data.message;
+          successMsg.style.display = 'block';
+          showToast(data.message, 'success');
+          
+          // Clear password fields
+          document.getElementById('sec_current_password').value = '';
+          document.getElementById('sec_new_password').value = '';
+          document.getElementById('sec_confirm_password').value = '';
+          
+          setTimeout(() => {
+            closeSecurityModal();
+          }, 2000);
+        } else {
+          errorMsg.textContent = data.message;
+          errorMsg.style.display = 'block';
+          showToast(data.message, 'error');
+        }
+      })
+      .catch(err => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+        errorMsg.textContent = 'An unexpected error occurred. Please try again.';
+        errorMsg.style.display = 'block';
+        console.error(err);
+      });
+    });
   </script>
 </body>
 </html>

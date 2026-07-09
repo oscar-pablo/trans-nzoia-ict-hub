@@ -1,61 +1,85 @@
 <?php
+/**
+ * p_login.php
+ * Handles the admin login form submitted from page_admin-login.php.
+ *
+ * ── Assumption ───────────────────────────────────────────────────────────
+ * This expects a table called `admins` with (at least) these columns:
+ *   id        INT / PK
+ *   username  VARCHAR
+ *   password  VARCHAR   -- hashed with PHP's password_hash(), NOT plain text
+ *
+ * If your table/column names are different, or your existing passwords are
+ * stored as plain text rather than hashed, tell me and I'll adjust this file
+ * to match your actual schema.
+ *
+ * If you need to create your first admin account / a hashed password, see
+ * the note at the bottom of this file.
+ */
 session_start();
+
 require_once 'page_db.php';
 
-// Only accept POST requests
+// ── Only accept POST requests here ─────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: page_admin-login.php");
     exit;
 }
 
 $username = trim($_POST['username'] ?? '');
-$password = trim($_POST['password'] ?? '');
+$password = $_POST['password'] ?? '';
 
-// Empty field check
-if (empty($username) || empty($password)) {
-    header("Location: page_admin-login.php?error=empty");
+// ── Basic validation ─────────────────────────────────────────────────────
+if ($username === '' || $password === '') {
+    header("Location: page_admin-login.php?error=empty&username=" . urlencode($username));
     exit;
 }
 
-// Fetch the user from admin_users table
-$stmt = $pdo->prepare("SELECT id, username, password FROM admin_users WHERE username = ? LIMIT 1");
-$stmt->execute([$username]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if ($user) {
-    $storedPassword   = $user['password'];
-    $isPasswordCorrect = false;
-
-    // Check if the stored password is already a bcrypt hash
-    if (password_get_info($storedPassword)['algo'] !== 0) {
-        // Already hashed — use secure verification
-        $isPasswordCorrect = password_verify($password, $storedPassword);
-    } else {
-        // Still plain text — direct comparison (fallback)
-        $isPasswordCorrect = ($password === $storedPassword);
-
-        // Auto-upgrade: silently hash the plain-text password on first successful login
-        if ($isPasswordCorrect) {
-            $newHash = password_hash($password, PASSWORD_DEFAULT);
-            $update  = $pdo->prepare("UPDATE admin_users SET password = ? WHERE id = ?");
-            $update->execute([$newHash, $user['id']]);
-        }
-    }
-
-    if ($isPasswordCorrect) {
-        // Regenerate session ID to prevent session fixation attacks
-        session_regenerate_id(true);
-
-        $_SESSION['admin_id']   = $user['id'];
-        $_SESSION['admin_name'] = $user['username'];
-        $_SESSION['logged_in']  = true;
-
-        header("Location: page_admin_dashboard.php");
-        exit;
-    }
+// ── Look up the admin by username ───────────────────────────────────────
+try {
+    $stmt = $pdo->prepare("SELECT id, username, password FROM admins WHERE username = :username LIMIT 1");
+    $stmt->execute([':username' => $username]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Login check failed: " . $e->getMessage());
 }
 
-// Login failed — keep error message generic (don't reveal if username exists)
-header("Location: page_admin-login.php?error=invalid&username=" . urlencode($username));
-exit;
-?>
+// ── Verify the password against the stored hash ─────────────────────────
+if ($admin && password_verify($password, $admin['password'])) {
+    // Regenerate the session ID on login to prevent session fixation
+    session_regenerate_id(true);
+
+    $_SESSION['admin_id']   = $admin['id'];
+    $_SESSION['logged_in']  = true;
+    $_SESSION['admin_name'] = $admin['username'];
+
+    header("Location: page_admin_dashboard.php");
+    exit;
+} else {
+    header("Location: page_admin-login.php?error=invalid&username=" . urlencode($username));
+    exit;
+}
+
+/**
+ * ── Creating an admin account ───────────────────────────────────────────
+ * If you don't have an `admins` table yet, or need to add your first
+ * account, here's the table and a one-off way to generate a password hash.
+ *
+ * SQL to create the table:
+ *
+ *   CREATE TABLE admins (
+ *     id INT AUTO_INCREMENT PRIMARY KEY,
+ *     username VARCHAR(100) NOT NULL UNIQUE,
+ *     password VARCHAR(255) NOT NULL,
+ *     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+ *   );
+ *
+ * To generate a hashed password to insert, run this in a throwaway PHP file
+ * (delete it afterwards!) or in `php -a` interactive mode:
+ *
+ *   echo password_hash('yourChosenPassword', PASSWORD_DEFAULT);
+ *
+ * Then insert the result into the admins table:
+ *
+ *   INSERT INTO admins (username, password) VALUES ('yourUsername', 'PASTE_THE_HASH_HERE');
+ */

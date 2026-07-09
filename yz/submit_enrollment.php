@@ -77,7 +77,7 @@ if (empty($course)) {
 }
 
 // Connect to database and insert enrollment
-require_once 'page_db.php';
+require_once __DIR__ . '/../page_db.php';
 
 try {
     $sql = "INSERT INTO enrollments (first_name, middle_name, last_name, has_id, id_type, id_number, phone, email, address, course, schedule, status) 
@@ -98,9 +98,22 @@ try {
         ':schedule'    => empty($schedule) ? null : $schedule
     ]);
 
+    // ── Send confirmation email (only if student provided an email) ──────────
+    $emailResult = ['sent' => false, 'error' => 'No email provided'];
+    if (!empty($email)) {
+        require_once 'mail_enrollment.php';
+        $emailResult = sendEnrollmentConfirmation($firstName, $email, $course);
+    }
+
+    // ── Respond to the client ─────────────────────────────────────────────────
+    // Email success/failure does NOT affect enrollment — DB save always wins.
+    $emailNote = (!empty($email) && $emailResult['sent'])
+        ? ' A confirmation email has been sent to ' . htmlspecialchars($email) . '.'
+        : '';
+
     echo json_encode([
-        'status' => 'success',
-        'message' => 'Thank you for applying. We will contact you within 24 hours to confirm your enrollment.'
+        'status'  => 'success',
+        'message' => 'Thank you for applying. We will contact you within 24 hours to confirm your enrollment.' . $emailNote
     ]);
 
 } catch (PDOException $e) {

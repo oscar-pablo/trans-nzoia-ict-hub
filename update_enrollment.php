@@ -2,7 +2,8 @@
 /**
  * update_enrollment.php
  * Handles admin AJAX updates (approve, reject, delete) for student enrollments.
- * Secured via session check.
+ * Secured via session check. Sends notification emails to students on
+ * approval or rejection, when an email address is on file.
  */
 
 header('Content-Type: application/json');
@@ -44,11 +45,12 @@ if ($id <= 0 || empty($action)) {
     exit;
 }
 
-require_once 'page_db.php';
+require_once __DIR__ . '/page_db.php';
 
 try {
-    // Check if enrollment exists
-    $checkStmt = $pdo->prepare("SELECT id, first_name, last_name FROM enrollments WHERE id = ?");
+    // Check if enrollment exists — now also fetching email and course,
+    // needed to send approval/rejection notification emails.
+    $checkStmt = $pdo->prepare("SELECT id, first_name, last_name, email, course FROM enrollments WHERE id = ?");
     $checkStmt->execute([$id]);
     $enrollment = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -60,35 +62,63 @@ try {
         exit;
     }
 
-    $studentName = htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name']);
+    $studentName  = htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name']);
+    $studentFirst = $enrollment['first_name'];
+    $studentEmail = $enrollment['email'] ?? '';
+    $studentCourse = $enrollment['course'] ?? '';
 
     if ($action === 'approve') {
         $stmt = $pdo->prepare("UPDATE enrollments SET status = 'Approved' WHERE id = ?");
         $stmt->execute([$id]);
-        
+
+        // ── Notify the student, if we have an email on file ──────────────────
+        $emailResult = ['sent' => false, 'error' => 'No email provided'];
+        if (!empty($studentEmail)) {
+            require_once __DIR__ . '/mail_enrollment.php';
+            $emailResult = sendApprovalEmail($studentFirst, $studentEmail, $studentCourse);
+        }
+
+        $emailNote = (!empty($studentEmail) && $emailResult['sent'])
+            ? " A notification email has been sent to {$studentEmail}."
+            : '';
+
         echo json_encode([
             'status' => 'success',
-            'message' => "Application for {$studentName} has been approved successfully."
+            'message' => "Application for {$studentName} has been approved successfully.{$emailNote}"
         ]);
         exit;
+
     } elseif ($action === 'reject') {
         $stmt = $pdo->prepare("UPDATE enrollments SET status = 'Rejected' WHERE id = ?");
         $stmt->execute([$id]);
-        
+
+        // ── Notify the student, if we have an email on file ──────────────────
+        $emailResult = ['sent' => false, 'error' => 'No email provided'];
+        if (!empty($studentEmail)) {
+            require_once __DIR__ . '/mail_enrollment.php';
+            $emailResult = sendRejectionEmail($studentFirst, $studentEmail, $studentCourse);
+        }
+
+        $emailNote = (!empty($studentEmail) && $emailResult['sent'])
+            ? " A notification email has been sent to {$studentEmail}."
+            : '';
+
         echo json_encode([
             'status' => 'success',
-            'message' => "Application for {$studentName} has been rejected."
+            'message' => "Application for {$studentName} has been rejected.{$emailNote}"
         ]);
         exit;
+
     } elseif ($action === 'delete') {
         $stmt = $pdo->prepare("DELETE FROM enrollments WHERE id = ?");
         $stmt->execute([$id]);
-        
+
         echo json_encode([
             'status' => 'success',
             'message' => "Enrollment record for {$studentName} has been permanently deleted."
         ]);
         exit;
+
     } else {
         echo json_encode([
             'status' => 'error',
